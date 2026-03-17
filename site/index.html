@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0f">
+<title>中国就业市场 AI 暴露度</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--bg-card:#12121a;--bg-card-hover:#1a1a28;--text:#e8e6e3;--text-dim:#8a8a9a;--text-bright:#fff;--accent:#6b8aff;--border:rgba(255,255,255,0.06);--border-focus:rgba(107,138,255,0.4);--font:'Noto Sans SC',-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;--px:40px}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ── Header ── */
+.header{padding:48px var(--px) 28px;max-width:1600px;margin:0 auto}
+.header h1{font-size:38px;font-weight:900;letter-spacing:-1px;line-height:1.2;background:linear-gradient(135deg,#fff 0%,#999 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header .subtitle{font-size:14px;color:var(--text-dim);margin-top:10px;line-height:1.7}
+.header .subtitle a{color:var(--accent);text-decoration:none}
+
+/* ── Stats ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 var(--px) 24px;max-width:1600px;margin:0 auto}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
+.stat-card .label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.stat-card .value{font-size:28px;font-weight:900;color:var(--text-bright);line-height:1}
+.stat-card .value .unit{font-size:13px;font-weight:400;color:var(--text-dim);margin-left:3px}
+.stat-card .note{font-size:11px;color:var(--text-dim);margin-top:5px}
+
+/* ── Search ── */
+.search-section{padding:0 var(--px) 24px;max-width:1600px;margin:0 auto}
+.search-box{position:relative}
+.search-box input{width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 20px 14px 44px;font-size:15px;font-family:var(--font);color:var(--text-bright);outline:none;transition:border-color .2s}
+.search-box input::placeholder{color:var(--text-dim)}
+.search-box input:focus{border-color:var(--border-focus)}
+.search-box .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:16px;pointer-events:none}
+.search-results{margin-top:10px;display:none}
+.search-results.show{display:block}
+.search-result-item{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.search-result-item:hover{background:var(--bg-card-hover);border-color:var(--border-focus)}
+.sr-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sr-name{font-size:16px;font-weight:700;color:var(--text-bright)}
+.sr-score{font-size:14px;font-weight:700;padding:2px 10px;border-radius:20px}
+.sr-meta{display:flex;gap:16px;font-size:12px;color:var(--text-dim);margin-bottom:8px;flex-wrap:wrap}
+.sr-rationale{font-size:13px;color:var(--text-dim);line-height:1.55}
+.sr-match{font-size:11px;color:var(--accent);margin-top:6px}
+.search-hint{font-size:12px;color:var(--text-dim);margin-top:8px;padding:0 4px;line-height:1.6;display:none}
+
+/* ── Dist bar ── */
+.dist-section{padding:0 var(--px) 20px;max-width:1600px;margin:0 auto}
+.section-title{font-size:12px;color:var(--text-dim);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
+.dist-bar-container{display:flex;height:36px;border-radius:8px;overflow:hidden;gap:2px}
+.dist-segment{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:rgba(0,0,0,.8);cursor:pointer;transition:filter .2s}
+.dist-segment:hover{filter:brightness(1.15)}
+.dist-legend{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.dist-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-dim)}
+.dist-legend-item .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.color-scale{display:flex;align-items:center;gap:8px;margin-top:10px}
+.color-scale .scale-bar{height:10px;width:180px;border-radius:5px;background:linear-gradient(to right,#22c55e,#84cc16,#eab308,#f97316,#ef4444,#dc2626)}
+.color-scale .scale-label{font-size:11px;color:var(--text-dim)}
+
+/* ── Treemap ── */
+.treemap-section{padding:0 var(--px) 28px;max-width:1600px;margin:0 auto}
+.treemap-controls{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.treemap-controls .cl{font-size:11px;color:var(--text-dim);margin-right:2px}
+.treemap-controls button{background:var(--bg-card);border:1px solid var(--border);color:var(--text-dim);padding:5px 12px;border-radius:6px;font-size:12px;font-family:var(--font);cursor:pointer;transition:all .2s;white-space:nowrap}
+.treemap-controls button:hover{background:var(--bg-card-hover);color:var(--text)}
+.treemap-controls button.active{background:rgba(107,138,255,.15);border-color:var(--accent);color:var(--accent)}
+#treemap{width:100%;height:640px;border-radius:12px;overflow:hidden;position:relative;background:var(--bg-card);border:1px solid var(--border)}
+.tc{position:absolute;overflow:hidden;cursor:pointer;transition:opacity .15s;border:.5px solid rgba(0,0,0,.25)}
+.tc:hover{opacity:.85;z-index:10}
+.tc .ct{position:absolute;top:3px;left:4px;right:4px;font-size:10px;font-weight:500;line-height:1.25;color:rgba(0,0,0,.8);pointer-events:none;overflow:hidden;text-overflow:ellipsis}
+.tc .ct.lt{color:rgba(255,255,255,.9)}
+.tc.hl{outline:3px solid #fff;outline-offset:-1px;z-index:20;opacity:1!important}
+
+/* ── Tooltip ── */
+.tooltip{position:fixed;background:#1a1a2e;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 18px;font-size:13px;max-width:360px;pointer-events:none;z-index:1000;opacity:0;transition:opacity .12s;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+.tooltip.show{opacity:1}
+.tooltip .tn{font-size:16px;font-weight:700;color:var(--text-bright);margin-bottom:3px}
+.tooltip .tcat{font-size:11px;color:var(--accent);margin-bottom:10px}
+.tooltip .tg{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-bottom:10px}
+.tooltip .tl{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px}
+.tooltip .tv{font-size:14px;font-weight:700;color:var(--text-bright)}
+.tooltip .tb{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin:6px 0}
+.tooltip .tbf{height:100%;border-radius:3px}
+.tooltip .tr{font-size:12px;color:var(--text-dim);line-height:1.5;border-top:1px solid var(--border);padding-top:8px}
+
+/* ── Scroll Picker ── */
+.picker-section{padding:0 var(--px) 36px;max-width:1600px;margin:0 auto}
+.picker-wrap{display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start}
+.picker-sort{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.picker-sort .ps-label{font-size:11px;color:var(--text-dim);margin-right:2px}
+.picker-sort button{background:var(--bg-card);border:1px solid var(--border);color:var(--text-dim);padding:4px 10px;border-radius:16px;font-size:11px;font-family:var(--font);cursor:pointer;transition:all .2s}
+.picker-sort button:hover{color:var(--text)}
+.picker-sort button.active{background:rgba(107,138,255,.15);border-color:var(--accent);color:var(--accent)}
+.picker-drum{position:relative;height:380px;overflow:hidden;background:var(--bg-card);border:1px solid var(--border);border-radius:12px}
+.picker-drum .fade-top{position:absolute;top:0;left:0;right:0;height:100px;background:linear-gradient(to bottom,var(--bg-card) 0%,transparent 100%);z-index:10;pointer-events:none;border-radius:12px 12px 0 0}
+.picker-drum .fade-bot{position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(to top,var(--bg-card) 0%,transparent 100%);z-index:10;pointer-events:none;border-radius:0 0 12px 12px}
+.picker-drum .center-band{position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);height:52px;border-top:1.5px solid rgba(107,138,255,.25);border-bottom:1.5px solid rgba(107,138,255,.25);background:rgba(107,138,255,.06);z-index:1;pointer-events:none}
+#wheel{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;position:relative;z-index:5;scrollbar-width:none}
+#wheel::-webkit-scrollbar{display:none}
+.wi{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;scroll-snap-align:center;cursor:pointer;user-select:none;-webkit-user-select:none}
+.wi .wn{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;transition:all .15s}
+.wi .ws{font-size:12px;font-weight:500;padding:2px 8px;border-radius:16px;white-space:nowrap;flex-shrink:0}
+.wi.active .wn{font-size:16px;color:var(--text-bright)}
+
+.picker-detail{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;min-height:380px;position:sticky;top:20px}
+.pd-empty{font-size:13px;color:var(--text-dim);text-align:center;padding:4rem 0}
+.pd-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.pd-name{font-size:22px;font-weight:900;color:var(--text-bright);line-height:1.2}
+.pd-cat{font-size:12px;color:var(--accent);margin-top:4px}
+.pd-badge{font-size:28px;font-weight:900;padding:6px 16px;border-radius:10px;line-height:1}
+.pd-badge .pd-unit{font-size:14px;font-weight:400;opacity:.6}
+.pd-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.pd-stat{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.pd-sl{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.pd-sv{font-size:16px;font-weight:700;color:var(--text-bright)}
+.pd-bar{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:16px}
+.pd-bf{height:100%;border-radius:3px;transition:width .4s ease}
+.pd-desc{font-size:13px;color:var(--text-dim);line-height:1.65;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:12px}
+.pd-rat{font-size:13px;color:var(--text);line-height:1.65}
+.pd-counter{font-size:11px;color:var(--text-dim);margin-top:12px;text-align:center}
+
+/* ── Charts ── */
+.charts-section{padding:0 var(--px) 36px;max-width:1600px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.chart-card h3{font-size:13px;font-weight:500;color:var(--text-dim);margin-bottom:14px}
+.bci{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bci .bl{font-size:12px;color:var(--text);width:100px;flex-shrink:0;text-align:right}
+.bci .bt{flex:1;height:22px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden}
+.bci .bf{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;transition:width .6s ease}
+.bci .bv{font-size:11px;font-weight:600;color:rgba(0,0,0,.7);white-space:nowrap}
+
+/* ── Mobile Detail Panel ── */
+.mobile-detail{display:none;position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;border-top:1px solid rgba(255,255,255,.12);border-radius:16px 16px 0 0;padding:20px 24px calc(20px + env(safe-area-inset-bottom));z-index:1000;box-shadow:0 -12px 40px rgba(0,0,0,.6);max-height:50vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.mobile-detail.show{display:block}
+.mobile-detail .dh{width:36px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 14px}
+
+/* ── Footer ── */
+.footer{padding:32px var(--px);text-align:center;border-top:1px solid var(--border);max-width:1600px;margin:0 auto}
+.footer p{font-size:12px;color:var(--text-dim);line-height:1.8}
+.footer a{color:var(--accent);text-decoration:none}
+
+/* ═══ Responsive ═══ */
+@media(max-width:1024px){
+  :root{--px:24px}
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .charts-section{grid-template-columns:1fr}
+  #treemap{height:540px}
+  .picker-wrap{grid-template-columns:1fr;gap:16px}
+  .picker-detail{position:static;min-height:auto}
+}
+@media(max-width:680px){
+  :root{--px:16px}
+  .header{padding:24px var(--px) 16px}
+  .header h1{font-size:24px}
+  .header .subtitle{font-size:12px;margin-top:6px}
+  .stats-bar{grid-template-columns:1fr 1fr;gap:8px;padding-bottom:16px}
+  .stat-card{padding:12px 14px;border-radius:10px}
+  .stat-card .label{font-size:10px}
+  .stat-card .value{font-size:22px}
+  .stat-card .value .unit{font-size:11px}
+  .stat-card .note{font-size:10px}
+  .search-box input{font-size:14px;padding:12px 16px 12px 40px;border-radius:10px}
+  .dist-bar-container{height:28px}
+  .dist-legend{gap:8px}
+  .dist-legend-item{font-size:10px}
+  .treemap-controls{gap:4px;margin-bottom:8px}
+  .treemap-controls .cl{font-size:10px}
+  .treemap-controls button{padding:4px 8px;font-size:11px}
+  #treemap{height:380px;border-radius:10px}
+  .tc .ct{font-size:9px;top:2px;left:3px}
+  .tooltip{display:none!important}
+  .picker-wrap{grid-template-columns:1fr}
+  .picker-drum{height:320px}
+  .picker-detail{min-height:auto;padding:16px}
+  .pd-stats{grid-template-columns:1fr 1fr}
+  .chart-card{padding:16px;border-radius:10px}
+  .bci .bl{width:80px;font-size:11px}
+  .footer{padding:24px var(--px)}
+  .search-result-item{padding:14px 16px}
+  .sr-name{font-size:15px}
+  .sr-meta{gap:10px}
+}
+@media(max-width:380px){
+  .header h1{font-size:20px}
+  .stat-card .value{font-size:18px}
+  #treemap{height:320px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>中国就业市场 AI 暴露度</h1>
+  <div class="subtitle"><span id="mc"></span>个职业 · 面积 = 就业人数 · 颜色 = AI暴露度<br>数据参考：<a href="https://www.stats.gov.cn" target="_blank">国家统计局</a> · <a href="https://www.mohrss.gov.cn" target="_blank">《职业分类大典(2022)》</a> · AI评分由 LLM 生成</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="label">覆盖就业人数</div><div class="value" id="sj">—</div><div class="note">万人</div></div>
+  <div class="stat-card"><div class="label">加权平均暴露度</div><div class="value" id="se">—</div><div class="note">就业加权, 0–10</div></div>
+  <div class="stat-card"><div class="label">高暴露岗位 (7+)</div><div class="value" id="sh">—</div><div class="note" id="shw">—</div></div>
+  <div class="stat-card"><div class="label">低暴露岗位 (≤3)</div><div class="value" id="sl">—</div><div class="note">体力劳动、现场服务为主</div></div>
+</div>
+
+<div class="search-section">
+  <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="si" placeholder="输入你的职业，查看 AI 暴露度（如：写代码、送外卖、教小学生…）" autocomplete="off"></div>
+  <div class="search-results" id="sr"></div>
+  <div class="search-hint" id="sht"></div>
+</div>
+
+<div class="dist-section">
+  <div class="section-title">就业人数分布（按暴露度）</div>
+  <div class="dist-bar-container" id="db"></div>
+  <div class="dist-legend" id="dl"></div>
+  <div class="color-scale"><span class="scale-label">安全</span><div class="scale-bar"></div><span class="scale-label">高暴露</span></div>
+</div>
+
+<div class="treemap-section">
+  <div class="treemap-controls">
+    <span class="cl">颜色：</span><button class="active" data-color="exposure">AI暴露度</button><button data-color="salary">薪资</button><button data-color="education">学历</button>
+    <span class="cl" style="margin-left:12px">分组：</span><button class="active" data-group="category">按大类</button><button data-group="exposure">按暴露度</button>
+  </div>
+  <div id="treemap"></div>
+</div>
+
+<!-- Scroll Picker -->
+<div class="picker-section">
+  <div class="section-title">滑动浏览全部职业</div>
+  <div class="picker-wrap">
+    <div>
+      <div class="picker-sort">
+        <span class="ps-label">排序</span>
+        <button class="active" data-psort="exposure">AI暴露度 ↓</button>
+        <button data-psort="salary">薪资 ↓</button>
+        <button data-psort="employment">就业人数 ↓</button>
+        <button data-psort="name">名称 A→Z</button>
+      </div>
+      <div class="picker-drum">
+        <div class="fade-top"></div>
+        <div class="fade-bot"></div>
+        <div class="center-band"></div>
+        <div id="wheel"></div>
+      </div>
+      <div class="pd-counter" id="pcnt"></div>
+    </div>
+    <div class="picker-detail" id="pd"><div class="pd-empty">滑动左侧滚轮选择职业</div></div>
+  </div>
+</div>
+
+<div class="charts-section">
+  <div class="chart-card"><h3>按薪资水平的平均暴露度</h3><div id="cs"></div></div>
+  <div class="chart-card"><h3>按学历要求的平均暴露度</h3><div id="ce"></div></div>
+</div>
+
+<div class="footer"><p>⚠️ AI暴露度评分由大语言模型生成，仅供参考，不构成经济预测或就业建议。<br>灵感来源：<a href="https://karpathy.ai/jobs/" target="_blank">Andrej Karpathy - AI Exposure of US Job Market</a><br>中国版 · 基于《中华人民共和国职业分类大典(2022)》和国家统计局数据</p></div>
+
+<div class="tooltip" id="tip"></div>
+<div class="mobile-detail" id="md"><div class="dh"></div><div id="mdc"></div></div>
+
+<script>
+const EC=['#16a34a','#22c55e','#65a30d','#84cc16','#a3e635','#eab308','#f59e0b','#f97316','#ef4444','#dc2626','#b91c1c'];
+function eC(s){return EC[Math.min(10,Math.max(0,Math.round(s)))]}
+function sC(s){return s<60000?'#3b82f6':s<150000?'#8b5cf6':'#ec4899'}
+const EDC={'初中及以下':'#6b7280','初中及以上':'#6b7280','高中/中专':'#8b5cf6','大专':'#3b82f6','大专及以上':'#3b82f6','本科':'#10b981','本科及以上':'#10b981','硕士及以上':'#f59e0b','各级':'#6b7280','无要求':'#6b7280'};
+function edC(e){return EDC[e]||'#6b7280'}
+function dk(c){const h=c.replace('#','');return(parseInt(h.substr(0,2),16)*.299+parseInt(h.substr(2,2),16)*.587+parseInt(h.substr(4,2),16)*.114)<140}
+const isM=()=>window.innerWidth<=680;
+function fm(n){return Math.round(n).toLocaleString('zh-CN')}
+
+/* ── Treemap layout ── */
+function sq(data,x,y,w,h){if(!data.length||w<=0||h<=0)return[];const t=data.reduce((s,d)=>s+d.value,0);if(t===0)return[];const R=[];ls([...data].sort((a,b)=>b.value-a.value),x,y,w,h,t,R);return R}
+function ls(items,x,y,w,h,t,R){if(!items.length)return;if(items.length===1){R.push({...items[0],x,y,w,h});return}const wide=w>=h,side=wide?h:w;let strip=[items[0]],sum=items[0].value,best=wr(strip,sum,side,t);for(let i=1;i<items.length;i++){const ns=sum+items[i].value,r=wr([...strip,items[i]],ns,side,t);if(r<=best){strip.push(items[i]);sum=ns;best=r}else break}const f=sum/t;if(wide){const sw=w*f;let cy=y;for(const it of strip){const ch=h*(it.value/sum);R.push({...it,x,y:cy,w:sw,h:ch});cy+=ch}ls(items.slice(strip.length),x+sw,y,w-sw,h,t-sum,R)}else{const sh=h*f;let cx=x;for(const it of strip){const cw=w*(it.value/sum);R.push({...it,x:cx,y,w:cw,h:sh});cx+=cw}ls(items.slice(strip.length),x,y+sh,w,h-sh,t-sum,R)}}
+function wr(strip,sum,side,t){const s2=(side*side*t)||1;let w=0;for(const it of strip){const r=(s2*it.value)/(sum*sum);w=Math.max(w,Math.max(r,1/r))}return w}
+
+let D=null,cColor='exposure',cGroup='category';
+
+async function init(){const r=await fetch('data.json');D=await r.json();stats();distBar();treemap();charts();controls();search();picker()}
+
+function stats(){const m=D.meta;document.getElementById('mc').textContent=m.total_occupations;document.getElementById('sj').innerHTML=fm(m.total_jobs/10000);document.getElementById('se').innerHTML=m.weighted_avg_exposure+'<span class="unit">/10</span>';const hi=D.occupations.filter(o=>o.exposure>=7),hJ=hi.reduce((s,o)=>s+o.employment,0),hW=hi.reduce((s,o)=>s+o.employment*o.salary,0);document.getElementById('sh').innerHTML=fm(hJ/10000)+'<span class="unit">万</span>';document.getElementById('shw').textContent='年薪资总额约 '+fm(hW/100000000)+' 亿元';const lo=D.occupations.filter(o=>o.exposure<=3),lJ=lo.reduce((s,o)=>s+o.employment,0);document.getElementById('sl').innerHTML=fm(lJ/10000)+'<span class="unit">万</span>'}
+
+function distBar(){const el=document.getElementById('db'),lg=document.getElementById('dl'),t=D.meta.total_jobs;const segs=[{r:'0-1',l:'0-1 极低',c:'#22c55e'},{r:'2-3',l:'2-3 低',c:'#84cc16'},{r:'4-5',l:'4-5 中',c:'#eab308'},{r:'6-7',l:'6-7 较高',c:'#f97316'},{r:'8-9',l:'8-9 高',c:'#ef4444'},{r:'10',l:'10 最高',c:'#b91c1c'}];el.innerHTML='';lg.innerHTML='';segs.forEach(s=>{const d=D.tiers[s.r];if(!d)return;const p=d.jobs/t*100;if(p<.1)return;const div=document.createElement('div');div.className='dist-segment';div.style.width=p+'%';div.style.background=s.c;if(p>5)div.innerHTML='<span>'+p.toFixed(0)+'%</span>';el.appendChild(div);const li=document.createElement('div');li.className='dist-legend-item';li.innerHTML='<span class="dot" style="background:'+s.c+'"></span>'+s.l+': '+fm(d.jobs/10000)+'万 ('+p.toFixed(1)+'%)';lg.appendChild(li)})}
+
+function treemap(){const c=document.getElementById('treemap'),W=c.clientWidth,H=c.clientHeight;c.innerHTML='';let groups;if(cGroup==='category'){const cats={};D.occupations.forEach(o=>{(cats[o.category]=cats[o.category]||[]).push(o)});groups=Object.entries(cats).map(([n,items])=>({name:n,items,total:items.reduce((s,i)=>s+i.employment,0)})).sort((a,b)=>b.total-a.total)}else{const tiers={};D.occupations.forEach(o=>{const t=o.exposure<=1?'0-1 极低':o.exposure<=3?'2-3 低':o.exposure<=5?'4-5 中':o.exposure<=7?'6-7 较高':o.exposure<=9?'8-9 高':'10 最高';(tiers[t]=tiers[t]||[]).push(o)});groups=Object.entries(tiers).map(([n,items])=>({name:n,items,total:items.reduce((s,i)=>s+i.employment,0)})).sort((a,b)=>b.total-a.total)}const gD=groups.map(g=>({...g,value:g.total}));sq(gD,0,0,W,H).forEach(gr=>{sq(gr.items.map(o=>({...o,value:o.employment})),gr.x+1,gr.y+1,gr.w-2,gr.h-2).forEach(cr=>{const d=document.createElement('div');d.className='tc';d.dataset.id=cr.id;d.style.cssText='left:'+cr.x+'px;top:'+cr.y+'px;width:'+Math.max(0,cr.w)+'px;height:'+Math.max(0,cr.h)+'px;';let co=cColor==='exposure'?eC(cr.exposure):cColor==='salary'?sC(cr.salary):edC(cr.education);d.style.background=co;if(cr.w>36&&cr.h>18){const sp=document.createElement('span');sp.className='ct'+(dk(co)?' lt':'');sp.textContent=cr.name;if(cr.w>70&&cr.h>32){sp.textContent=cr.name+'\n'+fm(cr.employment/10000)+'万';sp.style.whiteSpace='pre-line'}d.appendChild(sp)}if(isM()){d.addEventListener('click',()=>showMD(cr))}else{d.addEventListener('mouseenter',e=>showTip(e,cr));d.addEventListener('mousemove',moveTip);d.addEventListener('mouseleave',hideTip)}c.appendChild(d)})})}
+
+/* Tooltip */
+const tip=document.getElementById('tip');
+function showTip(e,d){const c=eC(d.exposure);tip.innerHTML='<div class="tn">'+d.name+'</div><div class="tcat">'+d.category+'</div><div class="tg"><div><div class="tl">就业人数</div><div class="tv">'+fm(d.employment/10000)+'万</div></div><div><div class="tl">中位年薪</div><div class="tv">¥'+fm(d.salary/1000)+'K</div></div><div><div class="tl">学历要求</div><div class="tv" style="font-size:12px">'+d.education+'</div></div><div><div class="tl">AI暴露度</div><div class="tv" style="color:'+c+'">'+d.exposure+'/10</div></div></div><div class="tb"><div class="tbf" style="width:'+d.exposure*10+'%;background:'+c+'"></div></div>'+(d.rationale?'<div class="tr">'+d.rationale+'</div>':'');tip.classList.add('show');moveTip(e)}
+function moveTip(e){let x=e.clientX+14,y=e.clientY+14;if(x+tip.offsetWidth>window.innerWidth-14)x=e.clientX-tip.offsetWidth-14;if(y+tip.offsetHeight>window.innerHeight-14)y=e.clientY-tip.offsetHeight-14;tip.style.left=x+'px';tip.style.top=y+'px'}
+function hideTip(){tip.classList.remove('show')}
+
+/* Mobile detail */
+function showMD(d){const c=eC(d.exposure);document.getElementById('mdc').innerHTML='<div style="font-size:18px;font-weight:700;color:var(--text-bright)">'+d.name+'</div><div style="font-size:12px;color:var(--accent);margin-bottom:12px">'+d.category+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div><div style="font-size:10px;color:var(--text-dim)">就业人数</div><div style="font-size:15px;font-weight:700;color:var(--text-bright)">'+fm(d.employment/10000)+'万</div></div><div><div style="font-size:10px;color:var(--text-dim)">年薪</div><div style="font-size:15px;font-weight:700;color:var(--text-bright)">¥'+fm(d.salary/1000)+'K</div></div><div><div style="font-size:10px;color:var(--text-dim)">学历</div><div style="font-size:13px;font-weight:700;color:var(--text-bright)">'+d.education+'</div></div><div><div style="font-size:10px;color:var(--text-dim)">AI暴露度</div><div style="font-size:15px;font-weight:700;color:'+c+'">'+d.exposure+'/10</div></div></div><div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:12px"><div style="height:100%;width:'+d.exposure*10+'%;background:'+c+';border-radius:3px"></div></div>'+(d.rationale?'<div style="font-size:13px;color:var(--text-dim);line-height:1.6">'+d.rationale+'</div>':'');document.getElementById('md').classList.add('show');document.querySelectorAll('.tc.hl').forEach(el=>el.classList.remove('hl'));const cell=document.querySelector('.tc[data-id="'+d.id+'"]');if(cell)cell.classList.add('hl')}
+document.addEventListener('click',e=>{const md=document.getElementById('md');if(md.classList.contains('show')&&!md.contains(e.target)&&!e.target.closest('.tc')){md.classList.remove('show');document.querySelectorAll('.tc.hl').forEach(el=>el.classList.remove('hl'))}});
+
+/* ── Scroll Picker ── */
+let pItems=[],pSort='exposure',pActive=-1;
+function picker(){pItems=[...D.occupations].sort((a,b)=>b.exposure-a.exposure);renderWheel();document.querySelectorAll('[data-psort]').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('[data-psort]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');pSort=btn.dataset.psort;if(pSort==='exposure')pItems=[...D.occupations].sort((a,b)=>b.exposure-a.exposure);else if(pSort==='salary')pItems=[...D.occupations].sort((a,b)=>b.salary-a.salary);else if(pSort==='employment')pItems=[...D.occupations].sort((a,b)=>b.employment-a.employment);else pItems=[...D.occupations].sort((a,b)=>a.name.localeCompare(b.name,'zh'));renderWheel()})})}
+
+function renderWheel(){const w=document.getElementById('wheel'),IH=52,pad=Math.floor(190/IH);let h='';for(let i=0;i<pad;i++)h+='<div style="height:'+IH+'px;scroll-snap-align:center"></div>';pItems.forEach((o,i)=>{const c=eC(o.exposure);h+='<div class="wi" data-idx="'+i+'"><span class="wn">'+o.name+'</span><span class="ws" style="background:'+c+';color:'+(dk(c)?'rgba(255,255,255,.9)':'rgba(0,0,0,.8)')+'">'+o.exposure+'</span></div>'});for(let i=0;i<pad;i++)h+='<div style="height:'+IH+'px;scroll-snap-align:center"></div>';w.innerHTML=h;document.getElementById('pcnt').textContent=pItems.length+' 个职业';pActive=-1;w.scrollTop=0;requestAnimationFrame(()=>{w.scrollTop=pad*IH;onWheel()})}
+
+function onWheel(){const w=document.getElementById('wheel'),IH=52,pad=Math.floor(190/IH),center=w.scrollTop+190;const idx=Math.round(center/IH)-pad,cl=Math.max(0,Math.min(pItems.length-1,idx));if(cl!==pActive){pActive=cl;document.querySelectorAll('.wi.active').forEach(el=>el.classList.remove('active'));const el=document.querySelector('.wi[data-idx="'+cl+'"]');if(el)el.classList.add('active');showPD(pItems[cl])}const all=w.querySelectorAll('.wi');all.forEach((el,i)=>{const ic=(pad+i)*IH+IH/2,dist=Math.abs(center-ic),norm=Math.min(dist/(IH*3),1),scale=1-norm*.12,opacity=1-norm*.55,rx=norm*30*(center>ic?1:-1);el.style.transform='perspective(600px) rotateX('+rx+'deg) scale('+scale+')';el.style.opacity=opacity})}
+
+function showPD(o){const c=eC(o.exposure),p=document.getElementById('pd');p.innerHTML='<div class="pd-header"><div><div class="pd-name">'+o.name+'</div><div class="pd-cat">'+o.category+'</div></div><div class="pd-badge" style="background:'+c+';color:'+(dk(c)?'rgba(255,255,255,.9)':'rgba(0,0,0,.8)')+'">'+o.exposure+'<span class="pd-unit">/10</span></div></div><div class="pd-stats"><div class="pd-stat"><div class="pd-sl">就业人数</div><div class="pd-sv">'+fm(o.employment/10000)+'万</div></div><div class="pd-stat"><div class="pd-sl">中位年薪</div><div class="pd-sv">¥'+fm(o.salary/1000)+'K</div></div><div class="pd-stat"><div class="pd-sl">学历要求</div><div class="pd-sv" style="font-size:13px">'+o.education+'</div></div></div><div class="pd-bar"><div class="pd-bf" style="width:'+o.exposure*10+'%;background:'+c+'"></div></div>'+(o.description?'<div class="pd-desc">'+o.description+'</div>':'')+'<div class="pd-rat">'+o.rationale+'</div>';/* highlight treemap */document.querySelectorAll('.tc.hl').forEach(el=>el.classList.remove('hl'));const cell=document.querySelector('.tc[data-id="'+o.id+'"]');if(cell)cell.classList.add('hl')}
+
+const wheel=document.getElementById('wheel');let wt;wheel.addEventListener('scroll',()=>{onWheel();clearTimeout(wt);wt=setTimeout(onWheel,80)},{passive:true});
+wheel.addEventListener('click',e=>{const wi=e.target.closest('.wi');if(wi){const idx=parseInt(wi.dataset.idx),IH=52,pad=Math.floor(190/IH);wheel.scrollTo({top:(pad+idx)*IH,behavior:'smooth'})}});
+
+/* ── Charts ── */
+function charts(){const sb=[{l:'< 4万',a:0,b:40000},{l:'4-7万',a:40000,b:70000},{l:'7-12万',a:70000,b:120000},{l:'12-20万',a:120000,b:200000},{l:'> 20万',a:200000,b:Infinity}];const sc=document.getElementById('cs');sc.innerHTML='';sb.forEach(b=>{const o=D.occupations.filter(x=>x.salary>=b.a&&x.salary<b.b);if(!o.length)return;const t=o.reduce((s,x)=>s+x.employment,0),avg=o.reduce((s,x)=>s+x.employment*x.exposure,0)/t;const d=document.createElement('div');d.className='bci';d.innerHTML='<div class="bl">'+b.l+'</div><div class="bt"><div class="bf" style="width:'+avg/10*100+'%;background:'+eC(avg)+'"><span class="bv">'+avg.toFixed(1)+'</span></div></div>';sc.appendChild(d)});const eg={'初中及以下':['初中及以下','初中及以上'],'高中/中专':['高中/中专'],'大专':['大专','大专及以上'],'本科及以上':['本科','本科及以上'],'硕士及以上':['硕士及以上']};const ec=document.getElementById('ce');ec.innerHTML='';Object.entries(eg).forEach(([l,edus])=>{const o=D.occupations.filter(x=>edus.includes(x.education));if(!o.length)return;const t=o.reduce((s,x)=>s+x.employment,0),avg=o.reduce((s,x)=>s+x.employment*x.exposure,0)/t;const d=document.createElement('div');d.className='bci';d.innerHTML='<div class="bl">'+l+'</div><div class="bt"><div class="bf" style="width:'+avg/10*100+'%;background:'+eC(avg)+'"><span class="bv">'+avg.toFixed(1)+'</span></div></div>';ec.appendChild(d)})}
+
+/* ── Controls ── */
+function controls(){document.querySelectorAll('[data-color]').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('[data-color]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');cColor=btn.dataset.color;treemap()})});document.querySelectorAll('[data-group]').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('[data-group]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');cGroup=btn.dataset.group;treemap()})});let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(treemap,200)})}
+
+/* ── Search ── */
+function getKW(){return{'写代码':['软件开发工程师','游戏开发者','运维/DevOps工程师','测试工程师','算法/AI工程师'],'编程':['软件开发工程师','游戏开发者','算法/AI工程师'],'程序员':['软件开发工程师','游戏开发者','算法/AI工程师'],'开车':['网约车司机','货车司机','公交/客车司机'],'出租车':['网约车司机'],'送外卖':['快递员/外卖骑手','平台兼职骑手/司机'],'送快递':['快递员/外卖骑手'],'老师':['教师（中小学）','大学教授/研究员','幼儿园老师','教培老师（线上）','特教老师'],'教小学生':['教师（中小学）'],'带孩子':['幼儿园老师','育婴师/月嫂','家政钟点工'],'看病':['医生（临床）','中医师'],'做饭':['厨师','餐饮个体户'],'开店':['零售个体户（实体）','餐饮个体户','电商/微商个体户'],'淘宝':['电商/微商个体户','电商运营'],'直播':['直播带货主播','网络主播/视频博主','短视频/直播兼职'],'装修':['装修工','建材/装修个体户'],'工地':['建筑工人','起重机操作员'],'写文章':['记者/编辑','内容创作者/自媒体','自由职业者（创意/知识类）'],'翻译':['翻译'],'设计':['平面/UI设计师','建筑师'],'理发':['美容师/美发师'],'打扫':['保洁员/清洁工','家政钟点工','环卫工人'],'种地':['农民（种植业）'],'做账':['会计/审计','财务出纳'],'打官司':['律师','法务/合规专员'],'炒股':['金融分析师','证券经纪人'],'银行':['银行柜员','银行信贷员'],'保险':['保险代理人','保险理赔员'],'卖房':['房产经纪人'],'健身':['健身教练'],'心理':['心理咨询师'],'客服':['客服专员'],'文员':['行政文员/秘书'],'公务员':['政府公务员'],'外贸':['外贸业务员'],'摆摊':['农产品/摊贩个体户','流动商贩/地摊经济'],'跑腿':['代驾/陪诊/跑腿等新业态'],'数据':['数据分析师','数据录入员'],'产品经理':['产品经理'],'hr':['人力资源专员'],'营销':['市场营销专员','电商运营'],'消防':['消防员'],'警察':['警察'],'高铁':['铁路列车司机'],'电工':['电工'],'物业':['物业管理员'],'导游':['导游'],'游戏':['游戏开发者'],'ai':['算法/AI工程师'],'人工智能':['算法/AI工程师'],'临时工':['兼职/临时工（体力类）'],'自由职业':['自由职业者（创意/知识类）'],'月嫂':['育婴师/月嫂'],'保姆':['家政服务员','家政钟点工'],'工厂':['电子产品组装工','汽车装配工','加工制造小作坊'],'卖保险':['保险代理人'],'修车':['汽车维修技师','新能源汽车维修技师']}}
+function search(){const input=document.getElementById('si'),res=document.getElementById('sr'),hint=document.getElementById('sht');let t;input.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>doS(input.value.trim()),200)});input.addEventListener('focus',()=>{if(!input.value.trim()){hint.textContent='试试输入：写代码、送外卖、教小学生、做饭、卖保险、自由职业…';hint.style.display='block'}});input.addEventListener('blur',()=>{setTimeout(()=>{if(!input.value.trim()){hint.style.display='none';res.classList.remove('show')}},200)})}
+function doS(q){const res=document.getElementById('sr'),hint=document.getElementById('sht');if(!q){res.classList.remove('show');hint.textContent='试试：写代码、送外卖、教小学生…';hint.style.display='block';return}hint.style.display='none';const KW=getKW();const scored=D.occupations.map(o=>{let s=0,mr='';const ql=q.toLowerCase(),nl=o.name.toLowerCase(),dl=(o.description||'').toLowerCase(),cl=o.category.toLowerCase(),rl=(o.rationale||'').toLowerCase();if(nl.includes(ql)){s+=100;mr='职业名称匹配'}if(cl.includes(ql)){s+=30;mr=mr||'分类匹配'}if(dl.includes(ql)){s+=50;mr=mr||'职业描述匹配'}if(rl.includes(ql)){s+=20;mr=mr||'分析内容匹配'}for(const[kw,names]of Object.entries(KW)){if(ql.includes(kw)||kw.includes(ql)){if(names.includes(o.name)){s+=80;mr=mr||'关键词「'+kw+'」匹配'}}}if(s===0){let cm=0;for(const ch of ql)if(nl.includes(ch)||dl.includes(ch))cm++;if(cm>=ql.length*.6&&ql.length>=2){s+=15;mr='模糊匹配'}}return{...o,score:s,matchReason:mr}}).filter(o=>o.score>0).sort((a,b)=>b.score-a.score).slice(0,3);if(!scored.length){res.innerHTML='<div style="padding:16px;color:var(--text-dim);font-size:13px">未找到匹配的职业，试试其他描述。</div>';res.classList.add('show');return}res.innerHTML=scored.map(o=>{const c=eC(o.exposure);return'<div class="search-result-item" data-id="'+o.id+'"><div class="sr-header"><span class="sr-name">'+o.name+'</span><span class="sr-score" style="background:'+c+';color:'+(dk(c)?'rgba(255,255,255,.9)':'rgba(0,0,0,.8)')+'">'+o.exposure+'/10</span></div><div class="sr-meta"><span>'+o.category+'</span><span>'+fm(o.employment/10000)+'万就业</span><span>¥'+fm(o.salary/1000)+'K/年</span></div><div class="sr-rationale">'+(o.rationale||o.description)+'</div><div class="sr-match">🎯 '+o.matchReason+'</div></div>'}).join('');res.classList.add('show');res.querySelectorAll('.search-result-item').forEach(el=>{el.addEventListener('click',()=>{const id=el.dataset.id;document.querySelectorAll('.tc.hl').forEach(c=>c.classList.remove('hl'));const cell=document.querySelector('.tc[data-id="'+id+'"]');if(cell){cell.classList.add('hl');cell.scrollIntoView({behavior:'smooth',block:'center'});const occ=D.occupations.find(o=>o.id===id);if(occ&&isM())showMD(occ)}})})}
+
+init();
+</script>
+</body>
+</html>
