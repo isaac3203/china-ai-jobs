@@ -58,19 +58,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 .waffle-cell .wcount{position:absolute;bottom:3px;left:4px;font-size:9px;color:rgba(0,0,0,.5);pointer-events:none}
 .waffle-cell .wcount.lt{color:rgba(255,255,255,.6)}
 
-/* ── Treemap ── */
-.treemap-section{padding:0 var(--px) 28px;max-width:1600px;margin:0 auto}
-.treemap-controls{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
-.treemap-controls .cl{font-size:11px;color:var(--text-dim);margin-right:2px}
-.treemap-controls button{background:var(--bg-card);border:1px solid var(--border);color:var(--text-dim);padding:5px 12px;border-radius:6px;font-size:12px;font-family:var(--font);cursor:pointer;transition:all .2s;white-space:nowrap}
-.treemap-controls button:hover{background:var(--bg-card-hover);color:var(--text)}
-.treemap-controls button.active{background:rgba(107,138,255,.15);border-color:var(--accent);color:var(--accent)}
-#treemap{width:100%;height:640px;border-radius:12px;overflow:hidden;position:relative;background:var(--bg-card);border:1px solid var(--border)}
-.tc{position:absolute;overflow:hidden;cursor:pointer;transition:opacity .15s;border:.5px solid rgba(0,0,0,.25)}
-.tc:hover{opacity:.85;z-index:10}
-.tc .ct{position:absolute;top:3px;left:4px;right:4px;font-size:10px;font-weight:500;line-height:1.25;color:rgba(0,0,0,.8);pointer-events:none;overflow:hidden;text-overflow:ellipsis}
-.tc .ct.lt{color:rgba(255,255,255,.9)}
-.tc.hl{outline:3px solid #fff;outline-offset:-1px;z-index:20;opacity:1!important}
 
 /* ── Tooltip ── */
 .tooltip{position:fixed;background:#1a1a2e;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 18px;font-size:13px;max-width:360px;pointer-events:none;z-index:1000;opacity:0;transition:opacity .12s;box-shadow:0 12px 40px rgba(0,0,0,.6)}
@@ -145,7 +132,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
   :root{--px:24px}
   .stats-bar{grid-template-columns:repeat(2,1fr)}
   .charts-section{grid-template-columns:1fr}
-  #treemap{height:540px}
   .picker-wrap{grid-template-columns:1fr;gap:16px}
   .picker-detail{position:static;min-height:auto}
 }
@@ -162,11 +148,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
   .stat-card .note{font-size:10px}
   .search-box input{font-size:14px;padding:12px 16px 12px 40px;border-radius:10px}
   #db{height:280px;border-radius:10px}
-  .treemap-controls{gap:4px;margin-bottom:8px}
-  .treemap-controls .cl{font-size:10px}
-  .treemap-controls button{padding:4px 8px;font-size:11px}
-  #treemap{height:380px;border-radius:10px}
-  .tc .ct{font-size:9px;top:2px;left:3px}
   .tooltip{display:none!important}
   .picker-wrap{grid-template-columns:1fr}
   .picker-drum{height:320px}
@@ -182,7 +163,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
 @media(max-width:380px){
   .header h1{font-size:20px}
   .stat-card .value{font-size:18px}
-  #treemap{height:320px}
 }
 </style>
 </head>
@@ -211,13 +191,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font);min-hei
   <div id="db"></div>
 </div>
 
-<div class="treemap-section">
-  <div class="treemap-controls">
-    <span class="cl">颜色：</span><button class="active" data-color="exposure">AI暴露度</button><button data-color="salary">薪资</button><button data-color="education">学历</button>
-    <span class="cl" style="margin-left:12px">分组：</span><button class="active" data-group="category">按大类</button><button data-group="exposure">按暴露度</button>
-  </div>
-  <div id="treemap"></div>
-</div>
 
 <!-- Scroll Picker -->
 <div class="picker-section">
@@ -268,15 +241,13 @@ function sq(data,x,y,w,h){if(!data.length||w<=0||h<=0)return[];const totalVal=da
 function sqLayout(items,x,y,w,h,R){if(!items.length)return;if(items.length===1){R.push({...items[0],x,y,w,h});return}const side=Math.min(w,h);let row=[items[0]],rowArea=items[0].area,best=sqWorst(row,rowArea,side);for(let i=1;i<items.length;i++){const na=rowArea+items[i].area,nw=sqWorst([...row,items[i]],na,side);if(nw<=best){row.push(items[i]);rowArea=na;best=nw}else break}if(w>=h){const rw=rowArea/h;let cy=y;for(const it of row){const ch=it.area/rw;R.push({...it,x,y:cy,w:rw,h:ch});cy+=ch}sqLayout(items.slice(row.length),x+rw,y,w-rw,h,R)}else{const rh=rowArea/w;let cx=x;for(const it of row){const cw=it.area/rh;R.push({...it,x:cx,y,w:cw,h:rh});cx+=cw}sqLayout(items.slice(row.length),x,y+rh,w,h-rh,R)}}
 function sqWorst(row,totalArea,side){const thick=totalArea/side;let worst=0;for(const it of row){const len=it.area/thick;const r=Math.max(thick/len,len/thick);if(r>worst)worst=r}return worst}
 
-let D=null,cColor='exposure',cGroup='category';
+let D=null;
 
-async function init(){const r=await fetch('data.json');D=await r.json();stats();waffleChart();treemap();charts();controls();search();picker()}
+async function init(){const r=await fetch('data.json');D=await r.json();stats();waffleChart();charts();controls();search();picker()}
 
 function stats(){const m=D.meta;document.getElementById('mc').textContent=m.total_occupations;document.getElementById('sj').innerHTML=fm(m.total_jobs/10000);document.getElementById('se').innerHTML=m.weighted_avg_exposure+'<span class="unit">/10</span>';const hi=D.occupations.filter(o=>o.exposure>=7),hJ=hi.reduce((s,o)=>s+o.employment,0),hW=hi.reduce((s,o)=>s+o.employment*o.salary,0);document.getElementById('sh').innerHTML=fm(hJ/10000)+'<span class="unit">万</span>';document.getElementById('shw').textContent='年薪资总额约 '+fm(hW/100000000)+' 亿元';const lo=D.occupations.filter(o=>o.exposure<=3),lJ=lo.reduce((s,o)=>s+o.employment,0);document.getElementById('sl').innerHTML=fm(lJ/10000)+'<span class="unit">万</span>'}
 
-function waffleChart(){const el=document.getElementById('db'),W=el.clientWidth,H=el.clientHeight;el.innerHTML='';const tiers={};D.occupations.forEach(o=>{const t=o.exposure<=1?'0-1':o.exposure<=3?'2-3':o.exposure<=5?'4-5':o.exposure<=7?'6-7':o.exposure<=9?'8-9':'10';(tiers[t]=tiers[t]||[]).push(o)});const groups=Object.entries(tiers).map(([n,items])=>({name:n,items,value:items.reduce((s,i)=>s+i.employment,0)})).sort((a,b)=>b.value-a.value);const gR=sq(groups,0,0,W,H);gR.forEach(gr=>{sq(gr.items.map(o=>({...o,value:o.employment})),gr.x+1,gr.y+1,gr.w-2,gr.h-2).forEach(cr=>{const color=eC(cr.exposure);const d=document.createElement('div');d.className='waffle-cell';d.dataset.wid=cr.id;d.style.cssText='left:'+cr.x+'px;top:'+cr.y+'px;width:'+Math.max(0,cr.w)+'px;height:'+Math.max(0,cr.h)+'px;background:'+color;d.title=cr.name+' ('+cr.exposure+'/10) '+fm(cr.employment/10000)+'万人';const isDk=dk(color);if(cr.w>36&&cr.h>18){const sp=document.createElement('span');sp.className='wlabel'+(isDk?' lt':'');sp.textContent=cr.name;if(cr.w>70&&cr.h>32){sp.textContent=cr.name+'\n'+fm(cr.employment/10000)+'万';sp.style.whiteSpace='pre-line'}d.appendChild(sp)}d.addEventListener('click',()=>{highlightWaffle(cr.id);scrollPickerTo(cr.id);showPD(cr);document.querySelectorAll('.tc.hl').forEach(c=>c.classList.remove('hl'));const tc=document.querySelector('.tc[data-id="'+cr.id+'"]');if(tc)tc.classList.add('hl');if(isM())showMD(cr)});el.appendChild(d)})})}
-
-function treemap(){const c=document.getElementById('treemap'),W=c.clientWidth,H=c.clientHeight;c.innerHTML='';let groups;if(cGroup==='category'){const cats={};D.occupations.forEach(o=>{(cats[o.category]=cats[o.category]||[]).push(o)});groups=Object.entries(cats).map(([n,items])=>({name:n,items,total:items.reduce((s,i)=>s+i.employment,0)})).sort((a,b)=>b.total-a.total)}else{const tiers={};D.occupations.forEach(o=>{const t=o.exposure<=1?'0-1 极低':o.exposure<=3?'2-3 低':o.exposure<=5?'4-5 中':o.exposure<=7?'6-7 较高':o.exposure<=9?'8-9 高':'10 最高';(tiers[t]=tiers[t]||[]).push(o)});groups=Object.entries(tiers).map(([n,items])=>({name:n,items,total:items.reduce((s,i)=>s+i.employment,0)})).sort((a,b)=>b.total-a.total)}const gD=groups.map(g=>({...g,value:g.total}));sq(gD,0,0,W,H).forEach(gr=>{sq(gr.items.map(o=>({...o,value:o.employment})),gr.x+1,gr.y+1,gr.w-2,gr.h-2).forEach(cr=>{const d=document.createElement('div');d.className='tc';d.dataset.id=cr.id;d.style.cssText='left:'+cr.x+'px;top:'+cr.y+'px;width:'+Math.max(0,cr.w)+'px;height:'+Math.max(0,cr.h)+'px;';let co=cColor==='exposure'?eC(cr.exposure):cColor==='salary'?sC(cr.salary):edC(cr.education);d.style.background=co;if(cr.w>36&&cr.h>18){const sp=document.createElement('span');sp.className='ct'+(dk(co)?' lt':'');sp.textContent=cr.name;if(cr.w>70&&cr.h>32){sp.textContent=cr.name+'\n'+fm(cr.employment/10000)+'万';sp.style.whiteSpace='pre-line'}d.appendChild(sp)}if(isM()){d.addEventListener('click',()=>showMD(cr))}else{d.addEventListener('mouseenter',e=>showTip(e,cr));d.addEventListener('mousemove',moveTip);d.addEventListener('mouseleave',hideTip)}c.appendChild(d)})})}
+function waffleChart(){const el=document.getElementById('db'),W=el.clientWidth,H=el.clientHeight;el.innerHTML='';const tiers={};D.occupations.forEach(o=>{const t=o.exposure<=1?'0-1':o.exposure<=3?'2-3':o.exposure<=5?'4-5':o.exposure<=7?'6-7':o.exposure<=9?'8-9':'10';(tiers[t]=tiers[t]||[]).push(o)});const groups=Object.entries(tiers).map(([n,items])=>({name:n,items,value:items.reduce((s,i)=>s+i.employment,0)})).sort((a,b)=>b.value-a.value);const gR=sq(groups,0,0,W,H);gR.forEach(gr=>{sq(gr.items.map(o=>({...o,value:o.employment})),gr.x+1,gr.y+1,gr.w-2,gr.h-2).forEach(cr=>{const color=eC(cr.exposure);const d=document.createElement('div');d.className='waffle-cell';d.dataset.wid=cr.id;d.style.cssText='left:'+cr.x+'px;top:'+cr.y+'px;width:'+Math.max(0,cr.w)+'px;height:'+Math.max(0,cr.h)+'px;background:'+color;d.title=cr.name+' ('+cr.exposure+'/10) '+fm(cr.employment/10000)+'万人';const isDk=dk(color);if(cr.w>36&&cr.h>18){const sp=document.createElement('span');sp.className='wlabel'+(isDk?' lt':'');sp.textContent=cr.name;if(cr.w>70&&cr.h>32){sp.textContent=cr.name+'\n'+fm(cr.employment/10000)+'万';sp.style.whiteSpace='pre-line'}d.appendChild(sp)}d.addEventListener('click',()=>{highlightWaffle(cr.id);scrollPickerTo(cr.id);showPD(cr);if(isM())showMD(cr)});el.appendChild(d)})})}
 
 /* Tooltip */
 const tip=document.getElementById('tip');
@@ -286,7 +257,7 @@ function hideTip(){tip.classList.remove('show')}
 
 /* Mobile detail */
 function showMD(d){const c=eC(d.exposure);document.getElementById('mdc').innerHTML='<div style="font-size:18px;font-weight:700;color:var(--text-bright)">'+d.name+'</div><div style="font-size:12px;color:var(--accent);margin-bottom:12px">'+d.category+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div><div style="font-size:10px;color:var(--text-dim)">就业人数</div><div style="font-size:15px;font-weight:700;color:var(--text-bright)">'+fm(d.employment/10000)+'万</div></div><div><div style="font-size:10px;color:var(--text-dim)">年薪</div><div style="font-size:15px;font-weight:700;color:var(--text-bright)">¥'+fm(d.salary/1000)+'K</div></div><div><div style="font-size:10px;color:var(--text-dim)">学历</div><div style="font-size:13px;font-weight:700;color:var(--text-bright)">'+d.education+'</div></div><div><div style="font-size:10px;color:var(--text-dim)">AI暴露度</div><div style="font-size:15px;font-weight:700;color:'+c+'">'+d.exposure+'/10</div></div></div><div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:12px"><div style="height:100%;width:'+d.exposure*10+'%;background:'+c+';border-radius:3px"></div></div>'+(d.rationale?'<div style="font-size:13px;color:var(--text-dim);line-height:1.6">'+d.rationale+'</div>':'');document.getElementById('md').classList.add('show');document.querySelectorAll('.tc.hl').forEach(el=>el.classList.remove('hl'));const cell=document.querySelector('.tc[data-id="'+d.id+'"]');if(cell)cell.classList.add('hl')}
-document.addEventListener('click',e=>{const md=document.getElementById('md');if(md.classList.contains('show')&&!md.contains(e.target)&&!e.target.closest('.tc')){md.classList.remove('show');document.querySelectorAll('.tc.hl').forEach(el=>el.classList.remove('hl'))}});
+document.addEventListener('click',e=>{const md=document.getElementById('md');if(md.classList.contains('show')&&!md.contains(e.target)){md.classList.remove('show')}});
 
 /* ── Scroll Picker ── */
 let pItems=[],pSort='exposure',pActive=-1;
@@ -308,7 +279,7 @@ function scrollPickerTo(id){const idx=pItems.findIndex(o=>o.id===id);if(idx<0)re
 function charts(){const sb=[{l:'< 4万',a:0,b:40000},{l:'4-7万',a:40000,b:70000},{l:'7-12万',a:70000,b:120000},{l:'12-20万',a:120000,b:200000},{l:'> 20万',a:200000,b:Infinity}];const sc=document.getElementById('cs');sc.innerHTML='';sb.forEach(b=>{const o=D.occupations.filter(x=>x.salary>=b.a&&x.salary<b.b);if(!o.length)return;const t=o.reduce((s,x)=>s+x.employment,0),avg=o.reduce((s,x)=>s+x.employment*x.exposure,0)/t;const d=document.createElement('div');d.className='bci';d.innerHTML='<div class="bl">'+b.l+'</div><div class="bt"><div class="bf" style="width:'+avg/10*100+'%;background:'+eC(avg)+'"><span class="bv">'+avg.toFixed(1)+'</span></div></div>';sc.appendChild(d)});const eg={'初中及以下':['初中及以下','初中及以上'],'高中/中专':['高中/中专'],'大专':['大专','大专及以上'],'本科及以上':['本科','本科及以上'],'硕士及以上':['硕士及以上']};const ec=document.getElementById('ce');ec.innerHTML='';Object.entries(eg).forEach(([l,edus])=>{const o=D.occupations.filter(x=>edus.includes(x.education));if(!o.length)return;const t=o.reduce((s,x)=>s+x.employment,0),avg=o.reduce((s,x)=>s+x.employment*x.exposure,0)/t;const d=document.createElement('div');d.className='bci';d.innerHTML='<div class="bl">'+l+'</div><div class="bt"><div class="bf" style="width:'+avg/10*100+'%;background:'+eC(avg)+'"><span class="bv">'+avg.toFixed(1)+'</span></div></div>';ec.appendChild(d)})}
 
 /* ── Controls ── */
-function controls(){document.querySelectorAll('[data-color]').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('[data-color]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');cColor=btn.dataset.color;treemap()})});document.querySelectorAll('[data-group]').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('[data-group]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');cGroup=btn.dataset.group;treemap()})});let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(treemap,200)})}
+function controls(){let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(waffleChart,200)})}
 
 /* ── Search ── */
 function getKW(){return{'写代码':['软件开发工程师','游戏开发者','运维/DevOps工程师','测试工程师','算法/AI工程师'],'编程':['软件开发工程师','游戏开发者','算法/AI工程师'],'程序员':['软件开发工程师','游戏开发者','算法/AI工程师'],'开车':['网约车司机','货车司机','公交/客车司机'],'出租车':['网约车司机'],'送外卖':['快递员/外卖骑手','平台兼职骑手/司机'],'送快递':['快递员/外卖骑手'],'老师':['教师（中小学）','大学教授/研究员','幼儿园老师','教培老师（线上）','特教老师'],'教小学生':['教师（中小学）'],'带孩子':['幼儿园老师','育婴师/月嫂','家政钟点工'],'看病':['医生（临床）','中医师'],'做饭':['厨师','餐饮个体户'],'开店':['零售个体户（实体）','餐饮个体户','电商/微商个体户'],'淘宝':['电商/微商个体户','电商运营'],'直播':['直播带货主播','网络主播/视频博主','短视频/直播兼职'],'装修':['装修工','建材/装修个体户'],'工地':['建筑工人','起重机操作员'],'写文章':['记者/编辑','内容创作者/自媒体','自由职业者（创意/知识类）'],'翻译':['翻译'],'设计':['平面/UI设计师','建筑师'],'理发':['美容师/美发师'],'打扫':['保洁员/清洁工','家政钟点工','环卫工人'],'种地':['农民（种植业）'],'做账':['会计/审计','财务出纳'],'打官司':['律师','法务/合规专员'],'炒股':['金融分析师','证券经纪人'],'银行':['银行柜员','银行信贷员'],'保险':['保险代理人','保险理赔员'],'卖房':['房产经纪人'],'健身':['健身教练'],'心理':['心理咨询师'],'客服':['客服专员'],'文员':['行政文员/秘书'],'公务员':['政府公务员'],'外贸':['外贸业务员'],'摆摊':['农产品/摊贩个体户','流动商贩/地摊经济'],'跑腿':['代驾/陪诊/跑腿等新业态'],'数据':['数据分析师','数据录入员'],'产品经理':['产品经理'],'hr':['人力资源专员'],'营销':['市场营销专员','电商运营'],'消防':['消防员'],'警察':['警察'],'高铁':['铁路列车司机'],'电工':['电工'],'物业':['物业管理员'],'导游':['导游'],'游戏':['游戏开发者'],'ai':['算法/AI工程师'],'人工智能':['算法/AI工程师'],'临时工':['兼职/临时工（体力类）'],'自由职业':['自由职业者（创意/知识类）'],'月嫂':['育婴师/月嫂'],'保姆':['家政服务员','家政钟点工'],'工厂':['电子产品组装工','汽车装配工','加工制造小作坊'],'卖保险':['保险代理人'],'修车':['汽车维修技师','新能源汽车维修技师']}}
